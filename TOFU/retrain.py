@@ -75,13 +75,13 @@ def main(cfg):
             save_steps=max_steps,
             save_only_model=True,
             ddp_find_unused_parameters= False,
-            evaluation_strategy="steps",
+            eval_strategy="steps",
             eval_steps = max_steps,
             deepspeed='config/ds_config.json',
             weight_decay = cfg.weight_decay,
         )
     model = AutoModelForCausalLM.from_pretrained(model_id, 
-                                                 use_flash_attention_2=model_cfg["flash_attention2"]=="true", 
+                                                 attn_implementation="flash_attention_2" if model_cfg["flash_attention2"]=="true" else "eager", 
                                                  torch_dtype=torch.bfloat16, 
                                                  trust_remote_code = True)
     model.generation_config.do_sample = True

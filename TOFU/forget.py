@@ -149,8 +149,8 @@ def main(cfg):
             ddp_find_unused_parameters= False,
             deepspeed='config/ds_config.json',
             weight_decay = cfg.weight_decay,
-            evaluation_strategy = "steps",
-            # evaluation_strategy = "no",
+            eval_strategy = "steps",
+            # eval_strategy = "no",
             eval_steps = eval_steps,
     )
     
@@ -171,11 +171,11 @@ def main(cfg):
 
     if path_found:
         print("Loading from checkpoint")
-        model = AutoModelForCausalLM.from_pretrained(cfg.model_path, use_auth_token=HUG_TOKEN, use_flash_attention_2=model_cfg["flash_attention2"]=="true", torch_dtype=torch.bfloat16, trust_remote_code = True)
-        oracle_model = AutoModelForCausalLM.from_pretrained(cfg.model_path, use_auth_token=HUG_TOKEN, use_flash_attention_2=model_cfg["flash_attention2"]=="true", torch_dtype=torch.bfloat16, trust_remote_code = True)
+        model = AutoModelForCausalLM.from_pretrained(cfg.model_path, use_auth_token=HUG_TOKEN, attn_implementation="flash_attention_2" if model_cfg["flash_attention2"]=="true" else "eager", torch_dtype=torch.bfloat16, trust_remote_code = True)
+        oracle_model = AutoModelForCausalLM.from_pretrained(cfg.model_path, use_auth_token=HUG_TOKEN, attn_implementation="flash_attention_2" if model_cfg["flash_attention2"]=="true" else "eager", torch_dtype=torch.bfloat16, trust_remote_code = True)
     else:
         print("Loading after merge and unload")
-        model = AutoModelForCausalLM.from_pretrained(model_id, use_flash_attention_2=model_cfg["flash_attention2"]=="true", torch_dtype=torch.bfloat16)
+        model = AutoModelForCausalLM.from_pretrained(model_id, attn_implementation="flash_attention_2" if model_cfg["flash_attention2"]=="true" else "eager", torch_dtype=torch.bfloat16)
         #now use the checkpoint to add the LoRA modules
         model = PeftModel.from_pretrained(model, model_id = cfg.model_path)
         #save this as a standard model so that we can again do PEFT style finetuneing from scratch
