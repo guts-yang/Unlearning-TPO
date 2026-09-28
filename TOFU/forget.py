@@ -9,10 +9,10 @@ import transformers
 # import os
 from peft import LoraConfig, get_peft_model, PeftModel
 from pathlib import Path
-from utils import get_model_identifiers_from_yaml, set_random_seed
+from utils import get_model_identifiers_from_yaml, set_random_seed, get_hf_token
 from omegaconf import OmegaConf
 
-HUG_TOKEN = ''
+HUG_TOKEN = get_hf_token()
 def find_all_linear_names(model):
     cls = torch.nn.Linear
     lora_module_names = set()
@@ -163,7 +163,7 @@ def main(cfg):
             path_found = True
             break
         
-        if re.search("model-*\.safetensors", file):
+        if re.search(r"model.*\.safetensors", file):
             path_found = True
             break
 

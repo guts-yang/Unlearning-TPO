@@ -8,9 +8,9 @@ import os
 from peft import LoraConfig, get_peft_model
 from pathlib import Path
 from omegaconf import OmegaConf
-from utils import get_model_identifiers_from_yaml, set_random_seed
+from utils import get_model_identifiers_from_yaml, set_random_seed, get_hf_token
 from datetime import datetime
-HUG_TOKEN = ''
+HUG_TOKEN = get_hf_token()
 
 def find_all_linear_names(model):
     cls = torch.nn.Linear

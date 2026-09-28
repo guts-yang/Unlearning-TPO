@@ -1,9 +1,31 @@
+import os
 import yaml
 import copy
 import numpy as np
 import torch
 import random
 from scipy.stats import sem, hmean, ks_2samp
+
+def get_hf_token():
+    for key in ("HF_TOKEN", "HUGGINGFACE_HUB_TOKEN"):
+        value = os.environ.get(key, "").strip()
+        if value:
+            return value
+    candidates = []
+    hf_home = os.environ.get("HF_HOME", "").strip()
+    if hf_home:
+        candidates.append(os.path.join(hf_home, "token"))
+    candidates.extend([
+        "/root/autodl-tmp/huggingface/token",
+        os.path.expanduser("~/.huggingface/token"),
+    ])
+    for path in candidates:
+        if os.path.isfile(path):
+            with open(path, "r") as handle:
+                token = handle.read().strip()
+            if token:
+                return token
+    return ""
 
 def get_model_identifiers_from_yaml(model_family):
     #path is model_configs.yaml
@@ -17,7 +39,8 @@ def get_model_identifiers_from_yaml(model_family):
             start_of_sequence_token: "<s>"
     '''
     model_configs  = {}
-    with open("/home/hp6438/desktop/code/unlearning/negative-preference-optimization-main/TOFU/config/model_config.yaml", "r") as f:
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "model_config.yaml")
+    with open(config_path, "r") as f:
         model_configs = yaml.load(f, Loader=yaml.FullLoader)
     return model_configs[model_family]
 

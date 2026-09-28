@@ -1,5 +1,5 @@
 model_family: llama2-7b
-model_path: NousResearch/Llama-2-7b-chat-hf
+model_path: /root/autodl-tmp/models/tofu_ft_llama2-7b
 LoRA:
   r: 0
   alpha: 32
@@ -19,6 +19,7 @@ npo_coeff: 1.0
 grad_diff_coeff: 1.0
 KL_coeff: 1.0
 ref_policy: fine_tuned
+# Llama-2-7B TPO beta: forget01=0.32, forget05=0.32, forget10=0.23
 beta: 0.32
 gamma: 0
 weight_decay: 0.01
