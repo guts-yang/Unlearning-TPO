@@ -63,6 +63,8 @@ def unlearn(
         gradient_accumulation_steps=gradient_accumulation_steps,
         learning_rate=learning_rate,
         save_strategy='epoch',  # Save every epoch
+        save_only_model=True,
+        save_total_limit=1,
         num_train_epochs=epochs,
         optim='adamw_torch',
         lr_scheduler_type='constant',

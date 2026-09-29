@@ -159,6 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--corpus', type=str, required=True, choices=CORPORA)
     parser.add_argument('--out_file', type=str, required=True)
     parser.add_argument('--metrics', type=str, nargs='+', default=SUPPORTED_METRICS)
+    parser.add_argument('--temp_dir', type=str, default='temp')
     args = parser.parse_args()
 
     load_then_eval_models(**vars(args))
