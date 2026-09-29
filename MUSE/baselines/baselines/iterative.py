@@ -119,7 +119,7 @@ class IterativeUnlearner(Trainer):
         super().__init__(*args, **kwargs)
 
 
-    def compute_loss(self, model, x, return_outputs=False):
+    def compute_loss(self, model, x, return_outputs=False, **kwargs):
         """Source: https://github.com/licong-lin/negative-preference-optimization/blob/main/synthetic/mymodel.py
         """
         
@@ -172,13 +172,13 @@ class IterativeUnlearner(Trainer):
             reversed_labels = []
             for ids, label in zip(x_f['input_ids'], x_f['labels']):
                 # Create a new labels tensor by reversing the mask
-                reversed_labels = torch.where(label == -100, ids, torch.tensor(-100, device= x_f['labels'].device))
+                reversed_label = torch.where(label == -100, ids, torch.tensor(-100, device= x_f['labels'].device))
                 
-                token_2_indices = (reversed_labels == 2).nonzero(as_tuple=True)[0]
+                token_2_indices = (reversed_label == 2).nonzero(as_tuple=True)[0]
                 if len(token_2_indices) > 1:
-                    reversed_labels[token_2_indices[1:]] = -100  # Mask all occurrences except the first
+                    reversed_label[token_2_indices[1:]] = -100  # Mask all occurrences except the first
              
-                reversed_labels.append(reversed_labels)
+                reversed_labels.append(reversed_label)
             reversed_labels = torch.stack(reversed_labels)
             outputs = model(x_f['input_ids'],labels=reversed_labels, attention_mask=x_f['attention_mask'])         ##attention_mask is used to indicate which tokens to attend to ()
             pl_loss = get_batch_loss(outputs.logits, reversed_labels).mean()
