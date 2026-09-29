@@ -25,7 +25,7 @@ def printll(name, inp):
     print(name, [round(x, 4) for x in inp])
 
 class CustomTrainer(Trainer):
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
         input_ids, labels, attention_mask = inputs
         outputs = model(input_ids,labels=labels, attention_mask=attention_mask)
         loss = outputs.loss
@@ -176,7 +176,7 @@ class CustomTrainerForgetting(Trainer):
                 return i
         return -1  # Return -1 if not found
     
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
         if self.loss_type == "grad_ascent":
             forget_inputs, retain_inputs = inputs
             input_ids, labels, attention_mask = forget_inputs
@@ -194,26 +194,26 @@ class CustomTrainerForgetting(Trainer):
 
             for ids, label in zip(input_ids, labels):
                 # Create a new labels tensor by reversing the mask
-                reversed_labels = torch.where(label == -100, ids, torch.tensor(-100, device=labels.device))
+                reversed_label = torch.where(label == -100, ids, torch.tensor(-100, device=labels.device))
                 
                 if self.model_family == 'llama2-7b':
-                    token_pad_indices = (reversed_labels == 2).nonzero(as_tuple=True)[0]
-                    answer_tag_ids = torch.tensor([29914, 25580, 29962]).to(reversed_labels.device)
+                    token_pad_indices = (reversed_label == 2).nonzero(as_tuple=True)[0]
+                    answer_tag_ids = torch.tensor([29914, 25580, 29962]).to(reversed_label.device)
 
                 elif self.model_family == 'llama3-3b':
-                    token_pad_indices = (reversed_labels == 128001).nonzero(as_tuple=True)[0]
-                    answer_tag_ids = torch.tensor([16533, 25]).to(reversed_labels.device)
+                    token_pad_indices = (reversed_label == 128001).nonzero(as_tuple=True)[0]
+                    answer_tag_ids = torch.tensor([16533, 25]).to(reversed_label.device)
                 else:
-                    token_pad_indices = (reversed_labels == self.tokenizer.pad_token_id).nonzero(as_tuple=True)[0]
+                    token_pad_indices = (reversed_label == self.tokenizer.pad_token_id).nonzero(as_tuple=True)[0]
                 
-                answer_tag_position = self.find_sublist_position(reversed_labels, answer_tag_ids)
+                answer_tag_position = self.find_sublist_position(reversed_label, answer_tag_ids)
 
                 if len(token_pad_indices) > 1:
-                    reversed_labels[token_pad_indices[1:]] = -100  # Mask all occurrences except the first
-                reversed_labels[:answer_tag_position+len(answer_tag_ids)] = -100
+                    reversed_label[token_pad_indices[1:]] = -100  # Mask all occurrences except the first
+                reversed_label[:answer_tag_position+len(answer_tag_ids)] = -100
 
 
-                reversed_labels.append(reversed_labels)
+                reversed_labels.append(reversed_label)
             reversed_labels = torch.stack(reversed_labels)
   
 
@@ -651,7 +651,7 @@ class CustomTrainerRetraining(Trainer):
             dataloader_params["worker_init_fn"] = seed_worker
         return self.accelerator.prepare(DataLoader(train_dataset, **dataloader_params))
 
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
         input_ids, labels, attention_mask = inputs
         outputs = model(input_ids,labels=labels, attention_mask=attention_mask)
         loss = outputs.loss
