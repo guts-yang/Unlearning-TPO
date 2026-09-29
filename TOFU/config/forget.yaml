@@ -30,7 +30,8 @@ overwrite_dir: true
 eval_steps: steps_per_epoch
 warmup_steps: steps_per_epoch
 
-save_dir: ${model_path}/unlearned/2GPU_${forget_loss}_${lr}_${split}_epoch${num_epochs}_batch${batch_size}_accum${gradient_accumulation_steps}_beta${beta}_gamma${gamma}_ref${ref_policy}_eval${eval_steps}_seed${seed}_${run_index}
+run_name: 2GPU_${forget_loss}_${lr}_${split}_epoch${num_epochs}_batch${batch_size}_accum${gradient_accumulation_steps}_beta${beta}_gamma${gamma}_ref${ref_policy}_eval${eval_steps}_seed${seed}_${run_index}
+save_dir: /root/autodl-tmp/models/tofu_ft_llama2-7b/unlearned/${run_name}
 
 eval:
   retain_result: data/${..retain_set}_llama_wd0.01/eval_results/ds_size300/eval_log_aggregated.json
